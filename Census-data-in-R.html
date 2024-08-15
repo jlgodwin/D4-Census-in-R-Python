@@ -391,8 +391,19 @@ tables</a>
 <ul>
 <li><a href="#datasets" id="toc-datasets">Datasets</a></li>
 <li><a href="#variable-table-names" id="toc-variable-table-names">Variable &amp; table names</a></li>
-<li><a href="#data" id="toc-data">Data</a></li>
+<li><a href="#data-year" id="toc-data-year">Data Year</a></li>
+<li><a href="#geographic-scale" id="toc-geographic-scale">Geographic
+scale</a></li>
+<li><a href="#temporal-scale" id="toc-temporal-scale">Temporal
+scale</a></li>
 </ul></li>
+<li><a href="#get_decennial" id="toc-get_decennial"><code>get_decennial()</code></a>
+<ul>
+<li><a href="#geoids" id="toc-geoids"><code>GEOID</code>s</a></li>
+</ul></li>
+<li><a href="#get_acs" id="toc-get_acs"><code>get_acs()</code></a></li>
+<li><a href="#dealing-with-variable-labels" id="toc-dealing-with-variable-labels">Dealing with variable
+labels</a></li>
 </ul></li>
 <li><a href="#getting-results" id="toc-getting-results">Getting
 results</a>
@@ -608,9 +619,9 @@ the following information:</p>
 <li>the dataset,</li>
 <li>the dataset-specific variable name,</li>
 <li>the annual timeframe for which you want data,</li>
-<li>the temporal scale for which you want data (ACS only: 1-year or
-3-year),</li>
 <li>the geographic level for which you want data, and</li>
+<li>the temporal scale for which you want data (ACS only: 1-year or
+5-year),</li>
 <li>your Census API key.</li>
 </ul>
 <p>In the subsections below, we briefly discuss the selection process
@@ -655,31 +666,303 @@ population overall (e.g. <code>B01001_001</code> and
 ## 5 B01001_005 Estimate!!Total:!!Male:!!10 to 14 years SEX BY AGE
 ## 6 B01001_006 Estimate!!Total:!!Male:!!15 to 17 years SEX BY AGE</code></pre>
 <p>A variable’s <code>name</code> is passed as a character string to the
-<code>variable</code> argument of the <code>get_acs()</code> or
+<code>variables</code> argument of the <code>get_acs()</code> or
 <code>get_decennial()</code> functions,
-e.g. <code>variable = &quot;B01001_001&quot;</code>. A character vector can be
+e.g. <code>variables = &quot;B01001_001&quot;</code>. A character vector can be
 passed if you would like to select more than one variable in the same
 API query,
-e.g. <code>variable = c(&quot;B01001_001&quot;, &quot;B01001_002&quot;)</code>.</p>
+e.g. <code>variables = c(&quot;B01001_001&quot;, &quot;B01001_002&quot;)</code>.</p>
 <p>There is also a <code>table</code> argument that allows you to select
 all variables from the same <code>concept</code>. For example, to select
 all variables from the <code>SEX BY AGE</code> concept, one would
 specify <code>table = &quot;B01001&quot;</code> and not specify anything for the
 <code>variable</code> argument.</p>
+<div id="tips-for-searching" class="section level4">
+<h4>Tips for searching</h4>
+<p>[to draft]</p>
 </div>
-<div id="data" class="section level3">
-<h3>Data</h3>
-<pre><code> *  Choosing an appropriate Census dataset for your task
- *  Finding variable names by searching concepts and labels
- *  Pulling data and basic cleaning (i.e. dealing with the &quot;!!&quot; in the labels)</code></pre>
 </div>
+<div id="data-year" class="section level3">
+<h3>Data Year</h3>
+<p>Both <code>get_acs()</code> and <code>get_decennial()</code> have a
+<code>year</code> argument. For the decennial Census and ACS 1-year
+data, the argument is simply the year for which you want data. However,
+for ACS 5-year data, the <code>year</code> argument still takes only one
+value and that value is the <em>endpoint</em> of the 5-year interval.
+For example, specifying <code>year = 2019</code> for ACS 5-year data
+will return estimates produced using ACS data collected in years
+2015-2019.</p>
+</div>
+<div id="geographic-scale" class="section level3">
+<h3>Geographic scale</h3>
+<p>Both <code>get_decennial()</code> and <code>get_acs()</code> require
+one to specify the <code>geography</code> argument indicating the
+geographic level (e.g. <code>national</code>, <code>county</code>,
+<code>tract</code>, etc.) at which data is requested. The <a href="https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus"><code>tidycensus</code>
+Basic Usage vignette</a> contains a list of the Census geographies and
+how they should be specified in <code>tidycensus</code></p>
+</div>
+<div id="temporal-scale" class="section level3">
+<h3>Temporal scale</h3>
+<p>Once you know your dataset of interest AND your geographic scale of
+interest, you are ready to specify your temporal scale.</p>
+<p>If you are using the <em>decennial Census</em>, you will be
+requesting data at the single year scale regardless of your
+<code>geography</code>. In the <code>get_decennial()</code> function you
+must set your <code>sumfile</code> argument to the appropriate Census
+summary file for that year (2000, 2010, or 2020). Find appropriate
+<code>sumfile</code> arguments for each decennial Census in <a href="https://walker-data.com/census-r/an-introduction-to-tidycensus.html#decennial-census">Section
+2.1.1.1 of Kyle Walker’s book</a>.</p>
+<p>If you are using the <em>ACS</em>, you will be requesting data at
+either the 1-year or 5-year scale <em>depending upon your choice of
+<code>geography</code></em>. In the <code>get_acs()</code> function you
+must set your <code>survey</code> argument to either <code>acs1</code>
+for 1-year data or <code>acs5</code> for 5-year data. For national,
+state, and large counties or cities (Census places), you can usually
+specify <code>survey = &quot;acs1&quot;</code>. For small counties or places,
+tracts, or block groups you will almost certainly need to specify
+<code>survey = &quot;acs5&quot;</code>. However, even at the state or county
+level, there may be some variables, e.g. population counts by age, sex,
+and race for a race category in the Census, that have a small count in
+that area and will require the use of 5-year data.</p>
+</div>
+</div>
+<div id="get_decennial" class="section level2">
+<h2><code>get_decennial()</code></h2>
+<p>Below we provide code for pulling counts of total housing units for
+each county in the state of Washington from the 2020 decennial Census
+using the following information:</p>
+<ul>
+<li>the dataset: <code>sumfile = pl</code>,</li>
+<li>the dataset-specific variable name: total housing units
+<code>variables = &quot;H1_001N&quot;</code>,</li>
+<li>the annual timeframe: <code>year = 2020</code>,</li>
+<li>the geographic level: <code>geography = &quot;county&quot;</code> and
+<code>state = &quot;WA&quot;</code>,</li>
+<li>the temporal scale: using decennial data, so there’s no argument to
+specify</li>
+<li>your Census API key: <code>key = mykey</code>.</li>
+</ul>
+<pre class="r"><code>hu_wa_2020 &lt;- get_decennial(geography = &quot;county&quot;,
+                            variables = &quot;H1_001N&quot;,
+                            year = 2020,
+                            sumfile = &quot;pl&quot;,
+                            state = &quot;WA&quot;,
+                            key = myKey)</code></pre>
+<pre><code>## Getting data from the 2020 decennial Census</code></pre>
+<pre><code>## Using the PL 94-171 Redistricting Data Summary File</code></pre>
+<pre><code>## Note: 2020 decennial Census data use differential privacy, a technique that
+## introduces errors into data to preserve respondent confidentiality.
+## ℹ Small counts should be interpreted with caution.
+## ℹ See https://www.census.gov/library/fact-sheets/2021/protecting-the-confidentiality-of-the-2020-census-redistricting-data.html for additional guidance.
+## This message is displayed once per session.</code></pre>
+<pre class="r"><code>head(hu_wa_2020)</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   GEOID NAME                       variable  value
+##   &lt;chr&gt; &lt;chr&gt;                      &lt;chr&gt;     &lt;dbl&gt;
+## 1 53001 Adams County, Washington   H1_001N    6735
+## 2 53003 Asotin County, Washington  H1_001N   10034
+## 3 53005 Benton County, Washington  H1_001N   80076
+## 4 53007 Chelan County, Washington  H1_001N   37267
+## 5 53009 Clallam County, Washington H1_001N   37930
+## 6 53011 Clark County, Washington   H1_001N  195036</code></pre>
+<div id="geoids" class="section level3">
+<h3><code>GEOID</code>s</h3>
+<p>The <code>GEOID</code> column of output includes the standard Census
+numeric code for a particular geography. States and counties are
+determined by their <a href="https://www.census.gov/library/reference/code-lists/ansi.html">Federal
+Information Processing Series(FIPS) codes</a>.</p>
+<p>The <strong>state</strong> code is 2 digits long, Washington’s FIPS
+code is 53, and we see each <code>GEOID</code> above begins with those
+digits.</p>
+<p>The <strong>county</strong> code within each state is 3 digits long.
+Adams County’s unique code within Washington is 001. So, the full
+<code>GEOID</code> for Adams County, Washington is 53001.</p>
+<p>The <strong>tract</strong> code that uniquely identifies a Census
+tract within a county is 6 digits long. The resulting <code>GEOID</code>
+for a tract in Adams County, Washington is then 53001TTTTTT, where
+TTTTTT represents a 6-digit tract code.</p>
+<p>The <strong>block group</strong> code that uniquely identifies each
+Census block group within a certain Census tract, TTTTTT, within Adams
+County, Washington is 1 digit long. The resulting <code>GEOID</code> for
+a block group within tract TTTTTT in Adams County, Washington is
+53001TTTTTTG, where G represents a 1 digit tract code.</p>
+<p>The <strong>block</strong> code that uniquely identifies each Census
+block within a block group, G, within a certain Census tract, TTTTTT,
+within Adams County, Washington is 3 digits long. The resulting
+<code>GEOID</code> for a block group within tract TTTTTT and block group
+G in Adams County, Washington is 53001TTTTTTGBBB, where BBB represents a
+3 digit tract code.</p>
+</div>
+</div>
+<div id="get_acs" class="section level2">
+<h2><code>get_acs()</code></h2>
+<p>Below we provide code for pulling counts of counts of individuals by
+sex for King County, Washington from the 2021 ACS using the following
+information:</p>
+<ul>
+<li>the dataset: ACS,</li>
+<li>the dataset-specific variable name: total male (002) and female
+(026) population
+<code>variables = c(&quot;B01001_002&quot;, &quot;B01001_025&quot;)</code>,</li>
+<li>the annual timeframe: <code>year = 2021</code>,</li>
+<li>the geographic level: <code>geography = &quot;county&quot;</code> and
+<code>state = &quot;WA&quot;</code> and <code>county = &quot;King&quot;</code>,</li>
+<li>the temporal scale: using ACS data at county level, let’s use 1-year
+data <code>survey = &quot;acs1&quot;</code></li>
+<li>your Census API key: <code>key = mykey</code>.</li>
+</ul>
+<pre class="r"><code>pop_sex_king_2021 &lt;- get_acs(geography = &quot;county&quot;,
+                            variables = c(&quot;B01001_002&quot;, &quot;B01001_026&quot;),
+                            year = 2021,
+                            survey = &quot;acs1&quot;,
+                            state = &quot;WA&quot;,
+                            county = &quot;King&quot;,
+                            key = myKey)</code></pre>
+<pre><code>## Getting data from the 2021 1-year ACS</code></pre>
+<pre><code>## The 1-year ACS provides data for geographies with populations of 65,000 and greater.</code></pre>
+<pre class="r"><code>head(pop_sex_king_2021)</code></pre>
+<pre><code>## # A tibble: 2 × 5
+##   GEOID NAME                    variable   estimate   moe
+##   &lt;chr&gt; &lt;chr&gt;                   &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;
+## 1 53033 King County, Washington B01001_002  1140802   552
+## 2 53033 King County, Washington B01001_026  1111503   552</code></pre>
+<p>While the output of <code>get_decennial()</code> only has a fourth
+column called <code>value</code> after <code>GEOID</code>,
+<code>NAME</code>, and <code>variable</code>, ACS output has two
+columns: <code>estimate</code> and <code>moe</code>.</p>
+<p><strong>NB: The <code>moe</code> represents the whole margin of error
+for a 90% (by default) confidence interval (CI). In other words,
+estimate + moe will give you the upper limit of a 90% CI and estimate -
+moe will give you the lower limit.</strong></p>
+<p>To calculate the standard error for each estimate when the default
+90% margin of error is used, use the following code:</p>
+<pre class="r"><code>pop_sex_king_2021 &lt;- pop_sex_king_2021 %&gt;% 
+  mutate(se = moe/qnorm(.95))</code></pre>
+<p>Below we provide code for pulling counts of individuals by sex and
+age for King County, Washington from the 2021 ACS using the following
+information:</p>
+<ul>
+<li>the dataset: ACS,</li>
+<li>the dataset-specific variable name: all variables in the concept
+“SEX BY AGE” <code>table = &quot;B01001&quot;</code>,</li>
+<li>the annual timeframe: <code>year = 2021</code>,</li>
+<li>the geographic level: <code>geography = &quot;county&quot;</code> and
+<code>state = &quot;WA&quot;</code> and <code>county = &quot;King&quot;</code>,</li>
+<li>the temporal scale: using ACS data at county level, let’s use 1-year
+data <code>survey = &quot;acs1&quot;</code></li>
+<li>your Census API key: <code>key = mykey</code>.</li>
+</ul>
+<p><strong>NB: If we wanted info for a county with a population less
+than 65,000 we would need to get 5-year data for 2017-2021 using
+<code>survey = &quot;acs5&quot;</code>.</strong></p>
+<pre class="r"><code>pop_sex_age_king_2021 &lt;- get_acs(geography = &quot;county&quot;,
+                                 table = &quot;B01001&quot;,
+                                 year = 2021,
+                                 survey = &quot;acs1&quot;,
+                                 state = &quot;WA&quot;,
+                                 county = &quot;King&quot;,
+                                 key = myKey)</code></pre>
+<pre><code>## Getting data from the 2021 1-year ACS</code></pre>
+<pre><code>## The 1-year ACS provides data for geographies with populations of 65,000 and greater.</code></pre>
+<pre><code>## Loading ACS1 variables for 2021 from table B01001. To cache this dataset for faster access to ACS tables in the future, run this function with `cache_table = TRUE`. You only need to do this once per ACS dataset.</code></pre>
+<pre class="r"><code>head(pop_sex_age_king_2021)</code></pre>
+<pre><code>## # A tibble: 6 × 5
+##   GEOID NAME                    variable   estimate   moe
+##   &lt;chr&gt; &lt;chr&gt;                   &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;
+## 1 53033 King County, Washington B01001_001  2252305    NA
+## 2 53033 King County, Washington B01001_002  1140802   552
+## 3 53033 King County, Washington B01001_003    61208   521
+## 4 53033 King County, Washington B01001_004    62450  3251
+## 5 53033 King County, Washington B01001_005    66507  3251
+## 6 53033 King County, Washington B01001_006    37342   367</code></pre>
+</div>
+<div id="dealing-with-variable-labels" class="section level2">
+<h2>Dealing with variable labels</h2>
+<p>Now that we’ve walked through querying the Census API for the
+decennial Census and the ACS via <code>tidycensus</code> we need to
+cover some basics to make this data more usable. First, and foremost, no
+one will ever be able to remember what every alphanumeric Census
+variable <code>name</code> is by heart. But, if we use the output of
+<code>load_variables()</code> coupled with some data-wrangling, we can
+get neat string labels in no time!</p>
+<p><strong>Step 1: Save the output of
+<code>load_variables()</code></strong></p>
+<pre class="r"><code>acs_vars_2021 &lt;- load_variables(year = 2021, dataset = &quot;acs1&quot;)
+head(acs_vars_2021)</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##   name        label                                   concept                 
+##   &lt;chr&gt;       &lt;chr&gt;                                   &lt;chr&gt;                   
+## 1 B01001A_001 Estimate!!Total:                        SEX BY AGE (WHITE ALONE)
+## 2 B01001A_002 Estimate!!Total:!!Male:                 SEX BY AGE (WHITE ALONE)
+## 3 B01001A_003 Estimate!!Total:!!Male:!!Under 5 years  SEX BY AGE (WHITE ALONE)
+## 4 B01001A_004 Estimate!!Total:!!Male:!!5 to 9 years   SEX BY AGE (WHITE ALONE)
+## 5 B01001A_005 Estimate!!Total:!!Male:!!10 to 14 years SEX BY AGE (WHITE ALONE)
+## 6 B01001A_006 Estimate!!Total:!!Male:!!15 to 17 years SEX BY AGE (WHITE ALONE)</code></pre>
+<p><strong>Step 2: Join <code>load_variables()</code> output with
+<code>get_*()</code> output</strong> Below, we join
+<code>acs_vars_2021</code> onto <code>pop_sex_age_king_2021</code> by
+the respective variable name column in each dataset. This still leaves
+the pesky issue of the “!!” and “:” in the label strings.</p>
+<pre class="r"><code>pop_sex_age_king_2021 &lt;- pop_sex_age_king_2021 %&gt;% 
+  left_join(acs_vars_2021 %&gt;% 
+              select(name, label),
+            by = c(&quot;variable&quot; = &quot;name&quot;)) %&gt;% 
+  relocate(&quot;label&quot;, .after = &quot;variable&quot;)
+
+head(pop_sex_age_king_2021)</code></pre>
+<pre><code>## # A tibble: 6 × 6
+##   GEOID NAME                    variable   label                  estimate   moe
+##   &lt;chr&gt; &lt;chr&gt;                   &lt;chr&gt;      &lt;chr&gt;                     &lt;dbl&gt; &lt;dbl&gt;
+## 1 53033 King County, Washington B01001_001 Estimate!!Total:        2252305    NA
+## 2 53033 King County, Washington B01001_002 Estimate!!Total:!!Mal…  1140802   552
+## 3 53033 King County, Washington B01001_003 Estimate!!Total:!!Mal…    61208   521
+## 4 53033 King County, Washington B01001_004 Estimate!!Total:!!Mal…    62450  3251
+## 5 53033 King County, Washington B01001_005 Estimate!!Total:!!Mal…    66507  3251
+## 6 53033 King County, Washington B01001_006 Estimate!!Total:!!Mal…    37342   367</code></pre>
+<p><strong>Step 3: Clean up the variable labels</strong> How you want to
+do this will vary for each concept, this specific example is appropriate
+for the “SEX BY AGE” concept. The result of this code is extra
+<code>sex</code> and <code>age</code> columns added to the ACS data
+making it easier to plot and analyze.</p>
+<pre class="r"><code> pop_sex_age_king_2021 &lt;- pop_sex_age_king_2021 %&gt;% 
+  ## Replace the starting &quot;Estimate!!Total:&quot; 
+  ## with an empty string everywhere
+  mutate(label = gsub(&quot;Estimate!!Total:&quot;, &quot;&quot;, label),
+  ## Replace all remaining !!
+         label = gsub(&quot;!!&quot;, &quot;&quot;, label)) %&gt;% 
+  ## The only special characters left now are the :
+  ## between sex and age groups
+  ## we will split the string in each row on the :
+  ## and retain the first element for sex and the second for label
+  group_by(variable) %&gt;% 
+  mutate(sex = unlist(strsplit(label, &quot;:&quot;))[1],
+         age = unlist(strsplit(label, &quot;:&quot;))[2]) %&gt;% 
+  ungroup() %&gt;% 
+  ## Fill in &quot;Total&quot; strings where sex or age are missing
+  mutate(sex = ifelse(is.na(sex), &quot;Total&quot;, sex),
+         age = ifelse(is.na(age), &quot;Total&quot;, age)) %&gt;% 
+  relocate(c(&quot;sex&quot;, &quot;age&quot;), .after = &quot;label&quot;)
+
+## Check our work
+pop_sex_age_king_2021 %&gt;% 
+  select(variable, label, sex, age) %&gt;% 
+  head()</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   variable   label                 sex   age           
+##   &lt;chr&gt;      &lt;chr&gt;                 &lt;chr&gt; &lt;chr&gt;         
+## 1 B01001_001 &quot;&quot;                    Total Total         
+## 2 B01001_002 &quot;Male:&quot;               Male  Total         
+## 3 B01001_003 &quot;Male:Under 5 years&quot;  Male  Under 5 years 
+## 4 B01001_004 &quot;Male:5 to 9 years&quot;   Male  5 to 9 years  
+## 5 B01001_005 &quot;Male:10 to 14 years&quot; Male  10 to 14 years
+## 6 B01001_006 &quot;Male:15 to 17 years&quot; Male  15 to 17 years</code></pre>
 </div>
 </div>
 <div id="getting-results" class="section level1">
 <h1>Getting results</h1>
 <div id="aggregating-estimates-across-labels" class="section level2">
 <h2>Aggregating estimates across labels</h2>
-<p>(i.e. getting the standard errors as right as you can)</p>
 </div>
 <div id="combining-census-data-with-other-data-sources-tyler" class="section level2">
 <h2>Combining Census data with other data sources [Tyler]</h2>

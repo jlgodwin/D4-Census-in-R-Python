@@ -135,7 +135,7 @@ The dataset you use will determine the name of the `tidycensus` function used to
 
 One access decennial Census data via the `get_decennial()` function and ACS data via the `get_acs()` function.
 
-### Variable \& table names
+### Variable & table names
 
 In `tidycensus` variables can be identified in the output of the `load_variables()` function by their `name`, `label`, and `concept`. A `concept` such as `SEX BY AGE` below is shared by many variables each of which are uniquely identified by an alphanumeric string, or their `name`. Variables are also uniquely identified by the combination of their `label` and their `concept`.
 
@@ -157,10 +157,12 @@ load_variables(year = 2021, dataset = "acs1") %>%
   filter(concept == "SEX BY AGE") %>% head()
 ```
 
-A variable's `name` is passed as a character string to the `variable` argument of the `get_acs()` or `get_decennial()` functions, e.g. `variable = "B01001_001"`. A character vector can be passed if you would like to select more than one variable in the same API query, e.g. `variable = c("B01001_001", "B01001_002")`. 
+A variable's `name` is passed as a character string to the `variables` argument of the `get_acs()` or `get_decennial()` functions, e.g. `variables = "B01001_001"`. A character vector can be passed if you would like to select more than one variable in the same API query, e.g. `variables = c("B01001_001", "B01001_002")`. 
 
 There is also a `table` argument that allows you to select all variables from the same `concept`. For example, to select all variables from the `SEX BY AGE` concept, one would specify `table = "B01001"` and not specify anything for the `variable` argument. 
 
+#### Tips for searching ####
+[to draft]
 
 ### Data Year
 
@@ -168,15 +170,160 @@ Both `get_acs()` and `get_decennial()` have a `year` argument. For the decennial
 
 ### Geographic scale
 
-Both `get_decennial()` and `get_acs()` require one to specify the `geogrpahyThe [`tidycensus` Basic Usage vignette](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus) contains a list of the Census geographies and how they should be specified in `tidycensus` 
+Both `get_decennial()` and `get_acs()` require one to specify the `geography` argument indicating the geographic level (e.g. `national`, `county`, `tract`, etc.) at which data is requested. The [`tidycensus` Basic Usage vignette](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus) contains a list of the Census geographies and how they should be specified in `tidycensus` 
   
-     *  Choosing an appropriate Census dataset for your task
-     *  Finding variable names by searching concepts and labels
-     *  Pulling data and basic cleaning (i.e. dealing with the "!!" in the labels)
+### Temporal scale
+
+Once you know your dataset of interest AND your geographic scale of interest, you are ready to specify your temporal scale. 
+
+If you are using the *decennial Census*, you will be requesting data at the single year scale regardless of your `geography`. In the `get_decennial()` function you must set your `sumfile` argument to the appropriate Census summary file for that year (2000, 2010, or 2020). Find appropriate `sumfile` arguments for each decennial Census in [Section 2.1.1.1 of Kyle Walker's book](https://walker-data.com/census-r/an-introduction-to-tidycensus.html#decennial-census).
+
+If you are using the *ACS*, you will be requesting data at either the 1-year or 5-year scale *depending upon your choice of `geography`*. In the `get_acs()` function you must set your `survey` argument to either `acs1` for 1-year data or `acs5` for 5-year data. For national, state, and large counties or cities (Census places), you can usually specify `survey = "acs1"`. For small counties or places, tracts, or block groups you will almost certainly need to specify `survey = "acs5"`. However, even at the state or county level, there may be some variables, e.g. population counts by age, sex, and race for a race category in the Census, that have a small count in that area and will require the use of 5-year data.
+
+## `get_decennial()`
+
+Below we provide code for pulling counts of total housing units for each county in the state of Washington from the 2020 decennial Census using the following information:
+
+  * the dataset: `sumfile = pl`,
+  * the dataset-specific variable name: total housing units `variables = "H1_001N"`,
+  * the annual timeframe: `year = 2020`,
+  * the geographic level: `geography = "county"` and `state = "WA"`,
+  * the temporal scale: using decennial data, so there's no argument to specify
+  * your Census API key: `key = mykey`.
+  
+```{r get_dec}
+hu_wa_2020 <- get_decennial(geography = "county",
+                            variables = "H1_001N",
+                            year = 2020,
+                            sumfile = "pl",
+                            state = "WA",
+                            key = myKey)
+head(hu_wa_2020)
+```
+
+### `GEOID`s
+
+The `GEOID` column of output includes the standard Census numeric code for a particular geography. States and counties are determined by their [Federal Information Processing Series(FIPS) codes](https://www.census.gov/library/reference/code-lists/ansi.html).
+
+The **state** code is 2 digits long, Washington's FIPS code is 53, and we see each `GEOID` above begins with those digits.
+
+The **county** code within each state is 3 digits long. Adams County's unique code within Washington is 001. So, the full `GEOID` for Adams County, Washington is 53001.
+
+The **tract** code that uniquely identifies a Census tract within a county is 6 digits long. The resulting `GEOID` for a tract in Adams County, Washington is then 53001TTTTTT, where TTTTTT represents a 6-digit tract code.
+
+The **block group** code that uniquely identifies each Census block group within a certain Census tract, TTTTTT, within Adams County, Washington is 1 digit long. The resulting `GEOID` for a block group within tract TTTTTT in Adams County, Washington is 53001TTTTTTG, where G represents a 1 digit tract code.
+
+The **block** code that uniquely identifies each Census block within a block group, G, within a certain Census tract, TTTTTT, within Adams County, Washington is 3 digits long. The resulting `GEOID` for a block group within tract TTTTTT and block group G in Adams County, Washington is 53001TTTTTTGBBB, where BBB represents a 3 digit tract code.
+
+## `get_acs()`
+Below we provide code for pulling counts of counts of individuals by sex for King County, Washington from the 2021 ACS using the following information:
+
+  * the dataset: ACS,
+  * the dataset-specific variable name: total male (002) and female (026) population `variables = c("B01001_002", "B01001_025")`,
+  * the annual timeframe: `year = 2021`,
+  * the geographic level: `geography = "county"` and `state = "WA"` and `county = "King"`,
+  * the temporal scale: using ACS data at county level, let's use 1-year data `survey = "acs1"`
+  * your Census API key: `key = mykey`.
+  
+```{r get_acs_sex}
+pop_sex_king_2021 <- get_acs(geography = "county",
+                            variables = c("B01001_002", "B01001_026"),
+                            year = 2021,
+                            survey = "acs1",
+                            state = "WA",
+                            county = "King",
+                            key = myKey)
+head(pop_sex_king_2021)
+```
+While the output of `get_decennial()` only has a fourth column called `value` after `GEOID`, `NAME`, and `variable`, ACS output has two columns: `estimate` and `moe`.
+
+**NB: The `moe` represents the whole margin of error for a 90\% (by default) confidence interval (CI). In other words, estimate + moe will give you the upper limit of a 90% CI and estimate - moe will give you the lower limit.**
+
+To calculate the standard error for each estimate when the default 90\% margin of error is used, use the following code:
+
+```{r get_acs_se}
+pop_sex_king_2021 <- pop_sex_king_2021 %>% 
+  mutate(se = moe/qnorm(.95))
+```
+
+Below we provide code for pulling counts of individuals by sex and age for King County, Washington from the 2021 ACS using the following information:
+
+  * the dataset: ACS,
+  * the dataset-specific variable name: all variables in the concept "SEX BY AGE" `table = "B01001"`,
+  * the annual timeframe: `year = 2021`,
+  * the geographic level: `geography = "county"` and `state = "WA"` and `county = "King"`,
+  * the temporal scale: using ACS data at county level, let's use 1-year data `survey = "acs1"`
+  * your Census API key: `key = mykey`.
+  
+**NB: If we wanted info for a county with a population less than 65,000 we would need to get 5-year data for 2017-2021 using `survey = "acs5"`.**
+  
+```{r get_acs_sex_age}
+pop_sex_age_king_2021 <- get_acs(geography = "county",
+                                 table = "B01001",
+                                 year = 2021,
+                                 survey = "acs1",
+                                 state = "WA",
+                                 county = "King",
+                                 key = myKey)
+head(pop_sex_age_king_2021)
+```
+
+## Dealing with variable labels
+
+Now that we've walked through querying the Census API for the decennial Census and the ACS via `tidycensus` we need to cover some basics to make this data more usable. First, and foremost, no one will ever be able to remember what every alphanumeric Census variable `name` is by heart. But, if we use the output of `load_variables()` coupled with some data-wrangling, we can get neat string labels in no time!
+
+**Step 1: Save the output of `load_variables()`**
+```{r load_vars_st1}
+acs_vars_2021 <- load_variables(year = 2021, dataset = "acs1")
+head(acs_vars_2021)
+```
+
+**Step 2: Join `load_variables()` output with `get_*()` output**
+Below, we join `acs_vars_2021` onto `pop_sex_age_king_2021` by the respective variable name column in each dataset. This still leaves the pesky issue of the "!!" and ":" in the label strings.
+
+```{r merge_load_vars}
+pop_sex_age_king_2021 <- pop_sex_age_king_2021 %>% 
+  left_join(acs_vars_2021 %>% 
+              select(name, label),
+            by = c("variable" = "name")) %>% 
+  relocate("label", .after = "variable")
+
+head(pop_sex_age_king_2021)
+```
+
+**Step 3: Clean up the variable labels**
+How you want to do this will vary for each concept, this specific example is appropriate for the "SEX BY AGE" concept. The result of this code is extra `sex` and `age` columns added to the ACS data making it easier to plot and analyze.
+
+```{r fix_labs}
+ pop_sex_age_king_2021 <- pop_sex_age_king_2021 %>% 
+  ## Replace the starting "Estimate!!Total:" 
+  ## with an empty string everywhere
+  mutate(label = gsub("Estimate!!Total:", "", label),
+  ## Replace all remaining !!
+         label = gsub("!!", "", label)) %>% 
+  ## The only special characters left now are the :
+  ## between sex and age groups
+  ## we will split the string in each row on the :
+  ## and retain the first element for sex and the second for label
+  group_by(variable) %>% 
+  mutate(sex = unlist(strsplit(label, ":"))[1],
+         age = unlist(strsplit(label, ":"))[2]) %>% 
+  ungroup() %>% 
+  ## Fill in "Total" strings where sex or age are missing
+  mutate(sex = ifelse(is.na(sex), "Total", sex),
+         age = ifelse(is.na(age), "Total", age)) %>% 
+  relocate(c("sex", "age"), .after = "label")
+
+## Check our work
+pop_sex_age_king_2021 %>% 
+  select(variable, label, sex, age) %>% 
+  head()
+```
 
 # Getting results
 ##   Aggregating estimates across labels
-(i.e. getting the standard errors as right as you can) 
+
+[to draft]
 
 ## Combining Census data with other data sources [Tyler]
      
