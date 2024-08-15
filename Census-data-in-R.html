@@ -569,16 +569,22 @@ member can have their own CensusAPIKey.R file on their own machine that
 is never pushed to GitHub. Your team’s code can be written in such a way
 that if CensusAPIKey.R is sourced in a script, every time an API key is
 needed a reference to the object <code>myKey</code> will be sufficient
-regardless of which team member is executing code. See example
-below.</p>
+regardless of which team member is executing code. See example using
+<code>tidycensus</code> below.</p>
 <pre class="r"><code>## Example works when CensusAPIKey.R is stored in
 ## the same filepath as the .R script being ran
 ## pointed to by rstudioapi::getActiveDocumentContext()$path
 
+# Setup ####
+## setwd() ####
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+## Libraries ####
 library(tidycensus)
+
+### Source Census API Key ####
 source(&quot;CensusAPIKey.R&quot;)
+### Set session API key in tidycensus
 census_api_key(key = myKey)</code></pre>
 </div>
 </div>
