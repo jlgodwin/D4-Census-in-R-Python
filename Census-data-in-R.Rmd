@@ -92,8 +92,19 @@ When initializing your group's GitHub repository, add the name of this file to y
 ![**Figure 3. Adding your API key script to the .gitignore file**](Figures/gitignoreAPI.png)
 
 
-Once your `.gitignore` is modified and pushed, every team member can have their own CensusAPIKey.R file on their own machine that is never pushed to GitHub. Your team's code can be written in such a way that if CensusAPIKey.R is sourced in a script, every time an API key is needed a reference to the object `myKey` will be sufficient regardless of which team member is executing code.
+Once your `.gitignore` is modified and pushed, every team member can have their own CensusAPIKey.R file on their own machine that is never pushed to GitHub. Your team's code can be written in such a way that if CensusAPIKey.R is sourced in a script, every time an API key is needed a reference to the object `myKey` will be sufficient regardless of which team member is executing code. See example below.
 
+```{r apikey_example, echo = TRUE, eval = FALSE}
+## Example works when CensusAPIKey.R is stored in
+## the same filepath as the .R script being ran
+## pointed to by rstudioapi::getActiveDocumentContext()$path
+
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+library(tidycensus)
+source("CensusAPIKey.R")
+census_api_key(key = myKey)
+```
 
 # Using `tidycensus`
 ## Selecting variables and tables
