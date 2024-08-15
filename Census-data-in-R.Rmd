@@ -108,12 +108,68 @@ library(tidycensus)
 
 ### Source Census API Key ####
 source("CensusAPIKey.R")
-### Set session API key in tidycensus
+### Set session API key in tidycensus ####
 census_api_key(key = myKey)
 ```
 
 # Using `tidycensus`
+
+The `tidycensus` package is superbly developed and maintained. Moreover, Kyle Walker has developed [so much material](https://walker-data.com/tidycensus/articles/) to aid `tidycensus` users including an entire textbook, [Analyzing US Census Data: Methods, Maps, and Models in R](https://walker-data.com/census-r/index.html). For questions not answered in this tutorial, this book is a great place to start.
+
+
 ## Selecting variables and tables
+
+To access Census data via `tidycensus` you need to know the following information:
+
+  * the dataset,
+  * the dataset-specific variable name,
+  * the annual timeframe for which you want data,
+  * the geographic level for which you want data, and
+  * the temporal scale for which you want data (ACS only: 1-year or 5-year), 
+  * your Census API key.
+  
+In the subsections below, we briefly discuss the selection process and how it relates to the `tidycensus` functions for querying Census APIs briefly. Following that, we provide full start-to-finish examples of querying both the decennial Census and ACS.
+
+### Datasets
+The dataset you use will determine the name of the `tidycensus` function used to query the Census API. 
+
+One access decennial Census data via the `get_decennial()` function and ACS data via the `get_acs()` function.
+
+### Variable \& table names
+
+In `tidycensus` variables can be identified in the output of the `load_variables()` function by their `name`, `label`, and `concept`. A `concept` such as `SEX BY AGE` below is shared by many variables each of which are uniquely identified by an alphanumeric string, or their `name`. Variables are also uniquely identified by the combination of their `label` and their `concept`.
+
+In the example below, all variables in the 2021 ACS within the `SEX BY AGE` `concept` have a `name` that begins with `B01001`. These variables contain estimates and margins of error for population counts by sex (Male, Female) and age categories (0-5, 5-9, 10-14, 15-17, 18-19, 20, 21, 22-24, 25-29, 30-34, 35-39, 40-44, 45-49, 50-54, 55-59, 60-61, 62-64, 65-66, 67-69, 70-74, 75-79, 80-84, and 85+.) Totals are provided for each sex and the population overall (e.g. `B01001_001` and `B01001_002` below.) 
+
+```{r load_var_output_pre, echo = FALSE, warning=FALSE, message=FALSE}
+## Libraries ####
+library(tidyr)
+library(dplyr)
+library(tidycensus)
+
+### Source Census API Key ####
+source("CensusAPIKey.R")
+### Set session API key in tidycensus ####
+census_api_key(key = myKey)
+```
+```{r load_var_output, echo = TRUE}
+load_variables(year = 2021, dataset = "acs1") %>%
+  filter(concept == "SEX BY AGE") %>% head()
+```
+
+A variable's `name` is passed as a character string to the `variable` argument of the `get_acs()` or `get_decennial()` functions, e.g. `variable = "B01001_001"`. A character vector can be passed if you would like to select more than one variable in the same API query, e.g. `variable = c("B01001_001", "B01001_002")`. 
+
+There is also a `table` argument that allows you to select all variables from the same `concept`. For example, to select all variables from the `SEX BY AGE` concept, one would specify `table = "B01001"` and not specify anything for the `variable` argument. 
+
+
+### Data Year
+
+Both `get_acs()` and `get_decennial()` have a `year` argument. For the decennial Census and ACS 1-year data, the argument is simply the year for which you want data. However, for ACS 5-year data, the `year` argument still takes only one value and that value is the *endpoint* of the 5-year interval. For example, specifying `year = 2019` for ACS 5-year data will return estimates produced using ACS data collected in years 2015-2019.
+
+### Geographic scale
+
+Both `get_decennial()` and `get_acs()` require one to specify the `geogrpahyThe [`tidycensus` Basic Usage vignette](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus) contains a list of the Census geographies and how they should be specified in `tidycensus` 
+  
      *  Choosing an appropriate Census dataset for your task
      *  Finding variable names by searching concepts and labels
      *  Pulling data and basic cleaning (i.e. dealing with the "!!" in the labels)
