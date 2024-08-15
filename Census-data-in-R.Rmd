@@ -56,6 +56,8 @@ Many Census data tables are available for download as Excel files or .csv's via 
 This tutorial will provide you with the necessary tools to access the Census data you need in a reproducible and simple way. 
      
 ## Tutorial Outline
+
+To be drafted.
      
 #  Accessing Census Bureau Data with R Packages
 ##  The Census API and `censusapi`
