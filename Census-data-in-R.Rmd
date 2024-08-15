@@ -73,6 +73,8 @@ The `censusapi` package ([CRAN](https://cran.r-project.org/web/packages/censusap
 
 The `tidycensus` package ([CRAN](https://cran.r-project.org/package=tidycensus), [GitHub](https://github.com/walkerke/tidycensus), [Author website](https://walker-data.com/tidycensus/#)) is an R package written and maintained by [Kyle Walker](https://walker-data.com/). The package provides access to tabular decennial Census, ACS, ACS Migration Flows, and Population Estimates datasets at both on- and off-spine Census geographies. In addition to taking care of the logistics of querying the API for you with easy-to-use functions, the `tidycensus` package wrangles the data into a nice format, providing spatial data objects when requested. 
 
+The remainder of this tutorial will focus on using `tidycensus`.
+
 
 ##  Getting and managing your Census API key
 
@@ -84,9 +86,12 @@ One nice work around is to have everyone in a group create their own R script su
 
 ![**Figure 2. Example of way to store your Census API key as a character object in R.**](Figures/APIKeyR.png)
 
+
 When initializing your group's GitHub repository, add the name of this file to your `.gitignore` file as in Figure 3. **NB: It's best to do this before adding the CensusAPIKey.R to your repository.** 
 
 ![**Figure 3. Adding your API key script to the .gitignore file**](Figures/gitignoreAPI.png)
+
+
 Once your `.gitignore` is modified and pushed, every team member can have their own CensusAPIKey.R file on their own machine that is never pushed to GitHub. Your team's code can be written in such a way that if CensusAPIKey.R is sourced in a script, every time an API key is needed a reference to the object `myKey` will be sufficient regardless of which team member is executing code.
 
 
