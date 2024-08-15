@@ -1,0 +1,75 @@
+---
+title: "D4 Tutorial: Reproducibly Accessing Census Data in R"
+author: "Tyler Fricker & Jessica Godwin"
+date: "August 8, 2024"
+output: 
+  html_document:
+    toc: true
+ 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir =
+                       dirname(rstudioapi::getActiveDocumentContext()$path))
+
+if(FALSE){
+  setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+}
+```
+
+
+# Introduction
+
+## Why use U.S. Census data in climate research?
+
+U.S. Census data is one of the predominate sources for information on **population size**, particularly when disaggregated by age, sex, race/ethnicity or other demographic and economic variables. Moreover, it is one of the only datasets providing. nationally-representative demographic and economic information on **households** and **housing units**. Data is collected every 10 years via the [Decennial Census of Population and Housing](https://www.census.gov/programs-surveys/decennial-census.html), but the [American Community Surve (ACS)](https://www.census.gov/programs-surveys/acs) is an annual survey of households designed to be nationally representative that collects more in-depth information about households and their members than the decennial Census. 
+
+It would be impossible to summarize the full array of questions asked in the ACS, but [one particularly relevant question](https://www.census.gov/acs/www/about/why-we-ask-each-question/migration/) is related to household member **migration**:
+
+**Question 15a. Did this person live in this house or apartment 1 year ago? Possible answers:**
+  
+  *  Person is under 1 year old $\rightarrow$ *SKIP to question 16*
+  *  Yes, this house $\rightarrow$ *SKIP to question 16*
+  *  No outside the United States and Puerto Rico - *Print name of foreign country or U.S. Virgin Islands, Guam, etc. below then SKIP to question 16*
+  *  No, different housein the United States or Puerto Rico.
+    
+**Question 15b. Where did this person live 1 year ago? Answer fields are: Address, Name of city, town, or post office, Name of U.S. county or municipio in Puerto Rico, Name of U.S. state or Puerto Rico, and ZIP Code.**
+
+Other Census datasets include the [Population Estimates Program](https://www.census.gov/programs-surveys/popest.html) (annual post-censal population and housing units estimates for each state, county, and jurisdiction), the [Current Population Survey](https://www.census.gov/programs-surveys/cps.html) (ongoing surveys on household membership and labor force participation), and many datasets on economic indicators.
+
+### Census geographies and uncertainty
+
+Census data is available at a wide array of spatial resolution, and availability varies by data source. Figure 1 shows the hierarchy of Census geographies. Those geographies that can be built from the basic Census geographic unit, the Census block, like along the vertical **"geographic spine"**. Certain data products are also produced for some of the **"off-spine" geographies** in Figure 1. 
+
+Decennial Census data is available at all geographies on the spine, but the introduction of **differential privacy** in the 2020 Decennial Census results in published counts that have more uncertainty at the smallest geographies of the spine. 2020 counts for the nation, states and large counties are reported with no uncertianty.
+
+Aggregated, area-level ACS data is available annually at the national, state, and large county or city levels (65,000 or more). Uncertainty in these estimates arise from the **sampling variability** inherent in the household sampling scheme. Though data is collected annually, data is only shared publicly at the Census tract and block group level using 5-years of data. Sub-samples of ACS **microdata**, or person-level data, can be accessed for larger levels of geographies as well.
+
+    
+## Why access Census data with R?
+
+
+ 
+     *  Why R/Python vs. point-and-click?
+     
+ ## Tutorial Outline
+     
+#  Accessing Census Bureau Data with R Packages
+##  The Census API and `censusapi`
+##  IPUMS, NHGIS, and `ipumsr`
+##  `tidycensus`
+##  Getting and managing your Census API key
+     * and writing reproducible/collaborative code that does not disclose your API key
+
+# Using `tidycensus`
+## Selecting variables and tables
+     *  Choosing an appropriate Census dataset for your task
+     *  Finding variable names by searching concepts and labels
+     *  Pulling data and basic cleaning (i.e. dealing with the "!!" in the labels)
+
+# Getting results
+##   Aggregating estimates across labels
+(i.e. getting the standard errors as right as you can) 
+## Combining Census data with other data sources [Tyler]
+     
