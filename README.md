@@ -16,6 +16,6 @@
      *  Finding variable names by searching concepts and labels
      *  Pulling data and basic cleaning (i.e. dealing with the "!!" in the labels)
   *  Getting results
-     *  Combining Census data with other data sources
-     *  Aggregating estimates across labels (i.e. getting the standard errors as right as you can)
-     *  Creating maps
+     *  Combining Census data with other data sources [Tyler]
+     *  Aggregating estimates across labels (i.e. getting the standard errors as right as you can) 
+     *  Creating maps [Tyler]
