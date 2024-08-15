@@ -42,25 +42,51 @@ Other Census datasets include the [Population Estimates Program](https://www.cen
 
 Census data is available at a wide array of spatial resolution, and availability varies by data source. Figure 1 shows the hierarchy of Census geographies. Those geographies that can be built from the basic Census geographic unit, the Census block, like along the vertical **"geographic spine"**. Certain data products are also produced for some of the **"off-spine" geographies** in Figure 1. 
 
+![**Figure 1. Hierarchy of Census geographies.**](Figures/Census_geogs.png)
+
 Decennial Census data is available at all geographies on the spine, but the introduction of **differential privacy** in the 2020 Decennial Census results in published counts that have more uncertainty at the smallest geographies of the spine. 2020 counts for the nation, states and large counties are reported with no uncertianty.
 
 Aggregated, area-level ACS data is available annually at the national, state, and large county or city levels (65,000 or more). Uncertainty in these estimates arise from the **sampling variability** inherent in the household sampling scheme. Though data is collected annually, data is only shared publicly at the Census tract and block group level using 5-years of data. Sub-samples of ACS **microdata**, or person-level data, can be accessed for larger levels of geographies as well.
 
     
-## Why access Census data with R?
+## Why access Census data with R or Python?
 
+Many Census data tables are available for download as Excel files or .csv's via the Census website and through [this interactive Census website](https://data.census.gov/table). However, accessing this data is not always reproducible. Moreover, you often need to download data for bigger geographic areas than may be of interest to you. Many packages and services exist to incorporate the downloading and accessing of specific variables for specific geographies into a reproducible workflow within R or Python. In addition, these packages often do much of the necessary "heavy-lifting" required to get the data into an easy-to-use format for other data science, GIS, or statistical programming tasks.
 
- 
-     *  Why R/Python vs. point-and-click?
+This tutorial will provide you with the necessary tools to access the Census data you need in a reproducible and simple way. 
      
 ## Tutorial Outline
      
 #  Accessing Census Bureau Data with R Packages
 ##  The Census API and `censusapi`
+
+The [Census Application Programming Interface (API)](https://www.census.gov/data/developers/guidance/api-user-guide.html) is a tool built by the Census Bureau to allow for the downloading of public use Census data in an easy and systematic way. The Census API can be queried by anyone with the internet and a **Census API Key** (a unique-to-you alphanumeric code issued by the Census Bureau).  It is constructed so you can specify the dataset and year you want, the specific variables you want within that dataset, and the geography for which you want the information within a formulaic URL in a relatively intuitive way. (See [examples](https://www.census.gov/data/developers/guidance/api-user-guide.Example_API_Queries.html#list-tab-559651575).) Though you can type these URLs into your internet browser, using functions within R or Python to visit certain URLs that query the API allow for a reproducible workflow. [This online Census Bureau course](https://www.census.gov/data/academy/courses/intro-to-the-census-bureau-data-api.html#1) is useful for those interested in learning more about the Census API
+
+The `censusapi` package ([CRAN](https://cran.r-project.org/web/packages/censusapi/index.html), [GitHub](https://github.com/hrecht/censusapi), [Author website](https://www.hrecht.com/censusapi/)) is an R package written and maintained by [Hannah Recht](https://www.hrecht.com/) that provides a suite of functions that facilitate the construction and implementation of Census API URL queries for more than 1,500 Census API endpoints. This package is an incredible tool, but there are better options if you are mainly interested in decennial Census and ACS data.
+
 ##  IPUMS, NHGIS, and `ipumsr`
+... [Tyler, do you want to write this section? I'm happy to if not! Also, do we move tigris here?]
+
 ##  `tidycensus`
+
+The `tidycensus` package ([CRAN](https://cran.r-project.org/package=tidycensus), [GitHub](https://github.com/walkerke/tidycensus), [Author website](https://walker-data.com/tidycensus/#)) is an R package written and maintained by [Kyle Walker](https://walker-data.com/). The package provides access to tabular decennial Census, ACS, ACS Migration Flows, and Population Estimates datasets at both on- and off-spine Census geographies. In addition to taking care of the logistics of querying the API for you with easy-to-use functions, the `tidycensus` package wrangles the data into a nice format, providing spatial data objects when requested. 
+
+
 ##  Getting and managing your Census API key
-     * and writing reproducible/collaborative code that does not disclose your API key
+
+To use either the `censusapi` or `tidycensus` packages you need to [request your Census API key](http://api.census.gov/data/key_signup.html). This process is quick! Your own personal API key will be delivered to the email address provided.
+
+One challenge with using these packages in a reproducible and group-based workflow is the management of API keys. Each member of the team who will be using any code that queries the Census APIs needs *their own API key*. API keys are not meant to be shared. 
+
+One nice work around is to have everyone in a group create their own R script such as the file CensusAPIKey.R in Figure 2. This purpose will assign an individual's Census API code to a character object with a common name. In this example, everyone's API character string is assigned to an object called `myKey`.
+
+![**Figure 2. Example of way to store your Census API key as a character object in R.**](Figures/APIKeyR.png)
+
+When initializing your group's GitHub repository, add the name of this file to your `.gitignore` file as in Figure 3. **NB: It's best to do this before adding the CensusAPIKey.R to your repository.** 
+
+![**Figure 3. Adding your API key script to the .gitignore file**](Figures/gitignoreAPI.png)
+Once your `.gitignore` is modified and pushed, every team member can have their own CensusAPIKey.R file on their own machine that is never pushed to GitHub. Your team's code can be written in such a way that if CensusAPIKey.R is sourced in a script, every time an API key is needed a reference to the object `myKey` will be sufficient regardless of which team member is executing code.
+
 
 # Using `tidycensus`
 ## Selecting variables and tables
