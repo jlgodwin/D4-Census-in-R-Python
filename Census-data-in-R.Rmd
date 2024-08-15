@@ -53,7 +53,7 @@ Aggregated, area-level ACS data is available annually at the national, state, an
  
      *  Why R/Python vs. point-and-click?
      
- ## Tutorial Outline
+## Tutorial Outline
      
 #  Accessing Census Bureau Data with R Packages
 ##  The Census API and `censusapi`
@@ -71,5 +71,6 @@ Aggregated, area-level ACS data is available annually at the national, state, an
 # Getting results
 ##   Aggregating estimates across labels
 (i.e. getting the standard errors as right as you can) 
+
 ## Combining Census data with other data sources [Tyler]
      
