@@ -1,15 +1,14 @@
 ---
 title: "D4 Tutorial: Reproducibly Accessing Census Data in R"
 author: "Tyler Fricker & Jessica Godwin"
-date: "August 8, 2024"
+date: "August 16, 2024"
 output: 
   html_document:
     toc: true
- 
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 knitr::opts_knit$set(root.dir =
                        dirname(rstudioapi::getActiveDocumentContext()$path))
 
@@ -321,9 +320,469 @@ pop_sex_age_king_2021 %>%
 ```
 
 # Getting results
+## Basic tables & plots
+[to draft a kableExtra example]
+
+[to draft a population line chart estimate across time]
+
 ##   Aggregating estimates across labels
 
 [to draft]
 
-## Combining Census data with other data sources [Tyler]
+## Census Geographic Data
+
+Census and ACS data are often associated with inherent *geographies*, which are units at which the data are aggregated. The defined geographies are represented in the U.S. Census Bureau's TIGER/Line database. TIGER stands for *Topologically Integrated Geographic Encoding and Referencing* and can be simply thought of as the official geographic spatial data of the U.S. Census Bureau.
+
+Spatial data sets are made available as shapefiles and include three general types of data:
+
+(1) Legal entities (e.g. states and counties)
+
+(2) Statistical entities (e.g. Census tracts and block groups)
+
+(3) Geographic features (e.g. roads and water features)
+
+A hierarchy of U.S. Census Bureau geographic data can be found [here](https://www2.census.gov/geo/pdfs/reference/geodiagram.pdf).
+
+To work with Census geographic data, we suggest the use of the **tigris** package, which simplifies the process for R users of obtaining and using Census geographic data sets. 
+
+Each type of geographic dataset available in the Census Bureau’s TIGER/Line database is available with a function in **tigris**. For example, the *states()* function can be run without arguments to download a boundary file of US states and state equivalents.
+
+```{r}
+library(tigris)
+st <- states(progress_bar = FALSE)
+```
+
+**tigris** defaults to the most recent year for which a complete set of Census shapefiles are available, which---right now---is 2021.
+
+Investigating the *st* object, we see a **sf** class representing all US states and territories, includes a data frame with a series of columns representing characteristics of those states, like a name, postal code, and Census ID (the GEOID column).
+
+The geometry of the *st* object can be seen using the *plot()* function.
+```{r}
+plot(st$geometry)
+```
+
+Other Census datasets may be available by state or by county within the state. In some cases. For example, the *counties()* function can be used to obtain county boundaries for the entirety of the United States, but also can be used with the state argument to return only those counties from a specific state, like Washington.
+```{r}
+wa_counties <- counties("WA", progress_bar = FALSE)
+
+plot(wa_counties$geometry)
+```
+
+States and counties are examples of legal entities that can be accessed with **tigris**. Statistical entities and geographic features are similarly accessed if they exist in the TIGER/Line database. For example, a user might request Census tract boundaries for a given county in Washington with the corresponding *tracts()* function.
+
+```{r}
+seattle_tracts <- tracts("WA", "King", progress_bar = FALSE)
+
+plot(seattle_tracts$geometry)
+```
+
+### Plotting Geographic Data in R
+
+R includes a number of options outside of the *plot()* function for quick visualization of geographic data that will be useful for geospatial analysis. For ease and inutitiveness, we suggest the **ggplot2** or **tmap** packages.
+
+At a basic level, a couple lines of **ggplot2** code are all that are needed to plot Census shapes obtained with tigris. For example, taking a look at the King County Census tracts:
+```{r}
+library(ggplot2)
+
+ggplot(seattle_tracts) + 
+  geom_sf()
+```
+
+By default, **ggplot2** includes a standard grey grid with latitude and longitude values displayed along the axes. For many cartographic applications, we would prefer to remove this background information. The *theme_minimal()* function strips the background grid, while keeping axis labels from the plot accordingly:
+```{r}
+ggplot(seattle_tracts) + 
+  geom_sf() + 
+  theme_minimal()
+```
+
+In addition to the traditional Tiger/Line shapefiles, the Census Bureau also makes available cartographic boundary shapefiles. These files are derived from the TIGER/Line shapefiles but are generalized in the interior and clipped to the shoreline of the United States, making them a better choice in many cases than the TIGER/Line shapefiles for thematic mapping. This is especially important when dealing with states that have some connection to water/international boundaries.
+
+For our Washington counties data set, we would want to run the following code accounting for the *cb = TRUE* argument:
+```{r}
+wa_counties_cb <- counties("WA", cb = TRUE, progress_bar = FALSE)
+
+plot(wa_counties$geometry)
+```
+
+Look at the difference below:
+```{r}
+library(patchwork)
+
+wa_tiger_gg <- ggplot(wa_counties) + 
+  geom_sf() + 
+  theme_minimal() + 
+  labs(title = "TIGER/Line")
+
+wa_cb_gg <- ggplot(wa_counties_cb) + 
+  geom_sf() + 
+  theme_minimal() + 
+  labs(title = "Cartographic boundary")
+
+wa_tiger_gg + wa_cb_gg
+```
+
+For geographic data to appropriately represent locations in mapping and geospatial analysis, they must be referenced to some model of the Earth’s surface correctly. We define this representative model of Earth with a *coordinate reference system* (CRS), which specifies not only how data coordinates should be mapped to a model of the Earth’s surface but also how measurements should be computed using a given data set.
+
+By default, data sets returned by **tigris** are stored in a geographic coordinate system, in which coordinates are represented as longitude and latitude relative to a three-dimensional model of the earth. The *st_crs()* function in the **sf** package helps us check the CRS of our data.
+
+For example, let's take another look at our Washington state data. 
+```{r}
+library(sf)
+
+st_crs(wa_counties)
+```
+
+All Census Bureau data sets are stored in the “NAD83” geographic coordinate system, which refers to the North American Datum of 1983. Other relevant information includes the ellipsoid used (GRS 1980, which is a generalized three-dimensional model of the Earth’s shape), the prime meridian of the CRS (Greenwich is used here), and the EPSG (European Petroleum Survey Group) ID of 4269, which is a special code that can be used to represent the CRS in more concise terms.
+
+Thousands of projected CRSs exist in thew world. While it can be a challenge to decide on the right projected CRS for your data, the **crsuggest** package can help narrow down the choices.
+
+For example, for the best mapping of our Washington counties data, we could choose:
+```{r}
+library(crsuggest)
+
+wa_crs <- suggest_crs(wa_counties_cb)
+```
+
+The "best choice” is the CRS “NAD83(2011) / Washington North” coordinate reference system, which is available with two different variations on the NAD1983 datum. Let’s choose the second entry, “NAD83(2011) / Washington North”, which is given in meters rather than U.S. feet. Coordinate reference system transformations in **sf** are done using the *st_transform()* function.
+```{r}
+wa_projected <- st_transform(wa_counties_cb, crs = 6596)
+
+st_crs(wa_projected)
+
+plot(wa_projected$geometry)
+```
+
+With a properly projected spatial data set, now we can apply any of the geospatial analyst functions (i.e., spatial overlays, intersections, buffers, etc.) without fear of distortion. From a pure mapping perspective, geographic coordinate systems---in $^\circ$ latitude and longitude---can work, but we suggest to almost always use a properly projected coordinate reference system.
+
+### Working with Census Geometries
+
+While understanding coordinate reference system transformations is important for spatial data management and geographic visualization, other types of geometric manipulations may be required by the spatial analyst.
+
+A common problem for national display of the United States is the fragmented nature of US states and territories geographically. The continental United States can be displayed on a map in a relatively straightforward way, and there are a number of projected coordinate reference systems designed for correct display of the continental US. Often, analysts and cartographers then have to make decisions about how to handle Alaska, Hawaii, and Puerto Rico, which cannot be reasonably plotted using default US projections.
+
+For example, let’s take a U.S. state-level shapefile obtained with **tigris** at low resolution and use **ggplot2** to visualize it in the default geographic CRS, NAD 1983:
+
+```{r}
+us_states <- states(cb = TRUE, resolution = "20m", progress_bar = FALSE)
+
+ggplot(us_states) + 
+  geom_sf() + 
+  theme_minimal()
+```
+
+The plot does not work well, in part because the Aleutian Islands in far west Alaska cross the 180$^\circ$ of longitude and are plotted on the opposite side of the map. In response, a projected coordinate reference system appropriate for the United States could be used, such as the continental US Albers Equal Area projection:
+```{r}
+ggplot(us_states) + 
+  geom_sf() + 
+  coord_sf(crs = 'ESRI:102003') + 
+  theme_minimal()
+```
+
+While this representation puts all territories in their appropriate locations, it is clearly not appropriate for Alaska, Hawaii, and Puerto Rico which appear distorted.
+
+**tigris** offers a solution to this problem with the *shift_geometry()* function. *shift_geometry()* takes an opinionated approach to the shifting and rescaling of Alaska, Hawaii, and Puerto Rico geometries to offer four options for an alternative view of the US. The function works by projecting geometries in Alaska, Hawaii, and Puerto Rico to appropriate coordinate reference systems for those areas, then re-sizing the geometries (if requested) and moving them to an alternative layout in relationship to the rest of the US using the Albers Equal Area CRS.
+```{r}
+us_states_shifted <- shift_geometry(us_states)
+
+ggplot(us_states_shifted) + 
+  geom_sf() + 
+  theme_minimal()
+```
+
+This view uses two default arguments: *preserve_area = FALSE*, which shrinks Alaska and inflates Hawaii and Puerto Rico, and position = "below", which places these areas below the continental United States. Alternatively, we can set *preserve_area = " "* and *position = " "* for a different view:
+```{r}
+us_states_outside <- shift_geometry(us_states, 
+                                    preserve_area = TRUE,
+                                    position = "outside")
+
+ggplot(us_states_outside) + 
+  geom_sf() + 
+  theme_void()
+```
+
+## Mapping Census and ACS Estimates in R
+
+Data from the United States Census Bureau are commonly visualized using maps, as both Census and ACS data are aggregated to enumeration units. Here, we will introduce the use of **tidycensus** and the *geometry = TRUE* argument within the *get_acs()*, *get_decennial()*, or *get_estimates()* function to investigate the spatial dimensions of Census and ACS data.
+
+Consider 2020 ACS median household income at the Census tract level in the District of Columbia:
+```{r dc_income, warning=FALSE, message=FALSE}
+dc_income <- get_acs(
+  geography = "tract", 
+  variables = "B19013_001",
+  state = "DC", 
+  year = 2020,
+  geometry = TRUE,
+  progress_bar = TRUE
+)
+
+head(dc_income)
+```
+
+Median household income data are found in the estimate column with associated margins of error in the moe column, along with a variable ID, GEOID, and Census tract name. The geometry column contains polygon feature geometry for each Census tract.
+
+We can map the ACS data across space using *plot()* or the functions in either the **ggplot2** or **tmap** packages. 
+
+Because *dc_income* is a simple features object, both geometry and attributes can be visualized with *plot()*.
+```{r}
+plot(dc_income["estimate"])
+```
+
+The plot() function returns a simple map showing income variation in Washington, DC. Wealthier areas, as represented with warmer colors, tend to be located in the northwestern part of the District. NA values are represented on the map in white.
+
+### Map-Making with ggplot2
+
+**ggplot2** can be used for quick plotting of sf objects using familiar **ggplot2** syntax.
+
+For example, let's consider the 2019 ACS 1-year estimates for median age by state:
+```{r us_med_age, warning=FALSE,message=FALSE}
+us_median_age <- get_acs(
+  geography = "state",
+  variables = "B01002_001",
+  year = 2019,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m"
+) %>%
+  shift_geometry()
+
+plot(us_median_age$geometry)
+```
+
+The state polygons can be styled using **ggplot2** conventions and the *geom_sf()* function. With two lines of **ggplot2** code, a basic map of median age by state can be created with **ggplot2** defaults.
+```{r}
+ggplot(data = us_median_age, aes(fill = estimate)) + 
+  geom_sf()
+```
+
+Additional editing of the **ggplot2** syntax can alter the cartographic design of the map. For instance, we can use the color palettes provided by [RColorBrewer ](https://colorbrewer2.org/#type=sequential&scheme=PuBu&n=3) in the *scale_fill_distiller()* function. We can also alter the title, caption, and legend using the *labs()* function, and apply a *theme_minimal()* function.
+```{r}
+ggplot(data = us_median_age, aes(fill = estimate)) + 
+  geom_sf() +
+  scale_fill_distiller(palette = "PuBu") +
+  labs(title = "  Median Age by State, 2019",
+       caption = "Data source: 2019 1-year ACS, US Census Bureau",
+       fill = "ACS estimate") +
+  theme_minimal()
+```
+
+### Map-Making with tmap
+
+Moving away from a general graphic package in **ggplot2**, the tmap package is an excellent alternative for mapping in R that includes a wide range of functionality for custom cartography. 
+
+Let's consider total population by Cenus tract in King County, Washington.
+```{r, message=FALSE,warning=FALSE}
+v20 <- load_variables(2020, dataset = "pl")
+
+king_pop <- get_decennial(
+  geography = "tract",
+  state = "WA",
+  county = "King",
+  variables = c(Total_Pop = "P1_001N"),
+  year = 2020,
+  geometry = TRUE
+)
+
+head(king_pop)
+```
+
+King County, Washington is an example of a complex Census tract geometry, given that one tract has no population (waterways surrounding Seattle). We should remove this tract before proceeding with any mapping. To do this, use the **dplyr** package and its piping (%>%) syntax.
+```{r}
+missing_pop <- "53033990100"
+
+king_pop <- king_pop %>%
+  filter(!GEOID %in% missing_pop)
+```
+
+tmap’s map-making syntax will be somewhat familiar to users of **ggplot2**, as it uses the concept of layers to specify modifications to the map. The map object is initialized with *tm_shape()*, which then allows us to view the Census tracts with *tm_polygons()*.
+```{r}
+library(tmap)
+
+tm_shape(king_pop) +
+  tm_polygons("value", palette = "PuBu")
+```
+
+**tmap** uses a classed color scheme rather than the continuous palette used by ggplot2, by default. This involves the identification of “classes” in the distribution of data values and mapping a color from a color palette to data values that belong to each class. The default classification scheme used by tm_fill() is "pretty", which identifies clean-looking intervals in the data based on the data range.
+
+Just like with **ggplot2**, you can alter the arguments within the **tmap** package (i.e., *tm_layout()* function) to improve the map.
+```{r}
+tm_shape(king_pop) +
+  tm_polygons("value", palette = "PuBu", title = "Total Population") +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+You can change the classification scheme, as well using the *style()* argument within the *tm_polygons()* function. **tmap** offers a number of classification schemes, including "cat", "fixed", "sd", "equal", "pretty", "quantile", "kmeans", "hclust", "bclust", "fisher", "jenks", "dpih", "headtails", and "log10_pretty".
+```{r}
+tm_shape(king_pop) +
+  tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+**tidycensus** offers all available Census and ACS variables included in a Census API. This makes other map types (e.g. dot-density maps) easier to navigate using functions like *as_dot_density()*. Let's try to create a dot-density map of race in King County, Washington and plot it here:
+```{r, warning=FALSE, message=FALSE}
+king_race <- get_decennial(
+  geography = "tract",
+  state = "WA",
+  county = "King",
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N"),
+  summary_var = "P2_001N",
+  year = 2020,
+  geometry = TRUE
+) %>%
+  mutate(percent = 100 * (value / summary_value))
+```
+
+Remove any zero populations/percentages
+```{r}
+king_race <- king_race %>%
+  filter(value > 0)
+```
+
+Now back to the dot-density map of race in King County, Washington.
+```{r}
+king_dots <- king_race %>%
+  as_dot_density(
+    value = "value",
+    values_per_dot = 100,
+    group = "variable"
+  )
+```
+The map itself is created with the *tm_dots()* function, which in this example is combined with a background map using *tm_polygons()* to show the relative racial and ethnic heterogeneity of Census tracts in King County.
+
+```{r,}
+background_tracts <- filter(king_race, variable == "White")
+
+tm_shape(background_tracts) + 
+  tm_polygons(col = "white", 
+              border.col = "grey") + 
+  tm_shape(king_dots) +
+  tm_dots(col = "variable", 
+          palette = "Set1",
+          size = 0.005, 
+          title = "1 dot = 100 people") + 
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+## Areal Interpolation
+
+Areal interpolation is the process making estimates from a source set of polygons to an overlapping but non-congruent set of target polygons. This technique is helpful if a project requires spatial analysis at the scale of a geometry not included in the Census enumerations.
+
+Simply areal interpolations can be performed using functions in the **areal** package. Two function prefixes are used in areal to allow users to take advantage of R’s auto complete functionality:
+
+(1) *ar_* - data and functions that are used for multiple interpolation methods
+
+(2) *aw_* - functions that are used specifically for areal weighted interpolation
+
+Let's consider a problem where HOLC Neighborhood designations are wanted to express socioeconomic and demographic data.
+
+Read in the HOLC spatial data and plot it according to neighborhood designation. Shreveport HOLC designations are found [here](https://dsl.richmond.edu/panorama/redlining/data).
+```{r}
+ShreveportHOLC <- st_read("Data/Shreveport.json")
+
+ShreveportHOLC <- ShreveportHOLC %>%
+  filter(!grade == "NA") # remove industrial and commerical grades
+
+pal = c("darkgreen", "blue", "yellow", "red")
+
+#tmap_mode("view")
+tm_shape(ShreveportHOLC) +
+  tm_polygons(col = "grade", pal = pal, title = "HOLC Grade") + 
+  tm_layout(frame = FALSE,
+            legend.outside = FALSE, legend.position = c("LEFT", "bottom"))
+```
+
+Now let's grab Census tracts for Shreveport.
+```{r}
+shreveport_pop <- get_decennial(
+  geography = "tract",
+  state = "LA",
+  county = c("Caddo", "Bossier"),
+  variables = c(Total_Pop = "P1_001N"),
+  year = 2020,
+  geometry = TRUE
+)
+
+head(shreveport_pop)
+
+tm_shape(shreveport_pop) +
+  tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+To find total population in the HOLC neighborhood grades, we need to areal interpolate to the spatial dimensions of the HOLC neighborhoods. Start by adding an "ID" column to both spatial data sets for the *aw_interpolate()* function to properly work. In addition, it is important to ensure the CRS for each spatial data set is projected in the same reference system. We do this below with the *st_transform()* function.
+```{r}
+library(areal)
+ShreveportHOLC$ID <- 1:nrow(ShreveportHOLC)
+shreveport_pop$ID2 <- 1:nrow(shreveport_pop)
+
+ShreveportHOLC <- ShreveportHOLC %>%
+  st_set_crs(4326) %>%
+  st_transform(., 5070)
+
+shreveport_pop <- shreveport_pop %>%
+  st_set_crs(5070)
+
+interpolated_output <- aw_interpolate(ShreveportHOLC, 
+               tid = "ID", 
+               source = shreveport_pop, 
+               sid = "ID2",
+               extensive = c("value"),
+               weight = "total", 
+               output = "sf")
+
+interpolated_output <- interpolated_output %>%
+  mutate(value = round(value))
+```
+
+Now we have a total population count ("value") for each HOLC neighborhood designation (26 polygons). 
+
+We can then map total population by neighborhood individually:
+```{r}
+tm_shape(interpolated_output) +
+  tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
+  tm_layout(frame = FALSE,
+            legend.outside = FALSE, legend.position = c("LEFT", "bottom"))
+```
+
+Or we can map total population by neighborhood grouped:
+```{r}
+interpolated_output_grouped <- interpolated_output %>%
+  group_by(grade) %>%
+  summarize(value = sum(value))
+
+tm_shape(interpolated_output_grouped) +
+  tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
+  tm_layout(frame = FALSE,
+            legend.outside = FALSE, legend.position = c("LEFT", "bottom"))
+```
+
+Plot with the HOLC neighborhood designations side-by-side.
+```{r}
+A <- tm_shape(ShreveportHOLC) +
+  tm_polygons(col = "grade", pal = pal, title = "HOLC Grade") + 
+  tm_style('white', main.title ="A", main.title.position = "left") +
+  tm_layout(frame = FALSE,
+            legend.outside = FALSE)
+  
+B <- tm_shape(interpolated_output_grouped) +
+  tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
+  tm_style('white', main.title ="B", main.title.position = "left") +
+  tm_layout(frame = FALSE,
+            legend.outside = FALSE, legend.position = c("LEFT", "bottom"))
+
+tmap_arrange(A, B, ncol = 2, asp = TRUE)
+```
+
+Happy mapping and spatial analysis with Census and ACS estimates in R!
+
+
+
      
