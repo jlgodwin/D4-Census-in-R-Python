@@ -345,8 +345,6 @@ Spatial data sets are made available as shapefiles and include three general typ
 
 (3) Geographic features (e.g. roads and water features)
 
-A hierarchy of U.S. Census Bureau geographic data can be found [here](https://www2.census.gov/geo/pdfs/reference/geodiagram.pdf).
-
 To work with Census geographic data, we suggest the use of the **tigris** package, which simplifies the process for R users of obtaining and using Census geographic data sets. 
 
 Each type of geographic dataset available in the Census Bureau’s TIGER/Line database is available with a function in **tigris**. For example, the *states()* function can be run without arguments to download a boundary file of US states and state equivalents.
@@ -462,7 +460,7 @@ With a properly projected spatial data set, now we can apply any of the geospati
 
 While understanding coordinate reference system transformations is important for spatial data management and geographic visualization, other types of geometric manipulations may be required by the spatial analyst.
 
-A common problem for national display of the United States is the fragmented nature of US states and territories geographically. The continental United States can be displayed on a map in a relatively straightforward way, and there are a number of projected coordinate reference systems designed for correct display of the continental US. Often, analysts and cartographers then have to make decisions about how to handle Alaska, Hawaii, and Puerto Rico, which cannot be reasonably plotted using default US projections.
+A common problem for a national display of the United States is the fragmented nature of US states and territories geographically. The continental United States can be displayed on a map in a relatively straightforward way, and there are a number of projected coordinate reference systems designed for correct display of the continental US. Often, analysts and cartographers then have to make decisions about how to handle Alaska, Hawaii, and Puerto Rico, which cannot be reasonably plotted using default US projections.
 
 For example, let’s take a U.S. state-level shapefile obtained with **tigris** at low resolution and use **ggplot2** to visualize it in the default geographic CRS, NAD 1983:
 
@@ -474,7 +472,9 @@ ggplot(us_states) +
   theme_minimal()
 ```
 
-The plot does not work well, in part because the Aleutian Islands in far west Alaska cross the 180$^\circ$ of longitude and are plotted on the opposite side of the map. In response, a projected coordinate reference system appropriate for the United States could be used, such as the continental US Albers Equal Area projection:
+The plot does not work well, in part because the Aleutian Islands in far west Alaska cross the 180$^\circ$ of longitude and are plotted on the opposite side of the map. 
+
+In response, a projected coordinate reference system appropriate for the United States could be used, such as the continental US Albers Equal Area projection:
 ```{r}
 ggplot(us_states) + 
   geom_sf() + 
@@ -571,7 +571,7 @@ ggplot(data = us_median_age, aes(fill = estimate)) +
 
 ### Map-Making with tmap
 
-Moving away from a general graphic package in **ggplot2**, the tmap package is an excellent alternative for mapping in R that includes a wide range of functionality for custom cartography. 
+Moving away from a general graphic package in **ggplot2**, the **tmap** package is an excellent alternative for mapping in R that includes a wide range of functionality for custom cartography. 
 
 Let's consider total population by Cenus tract in King County, Washington.
 ```{r, message=FALSE,warning=FALSE}
@@ -686,7 +686,7 @@ Simply areal interpolations can be performed using functions in the **areal** pa
 
 Let's consider a problem where HOLC Neighborhood designations are wanted to express socioeconomic and demographic data.
 
-Read in the HOLC spatial data and plot it according to neighborhood designation. Shreveport HOLC designations are found [here](https://dsl.richmond.edu/panorama/redlining/data).
+Read in the HOLC spatial data and plot it according to neighborhood designation. Shreveport, Louisiana HOLC designations are found [here](https://dsl.richmond.edu/panorama/redlining/data).
 ```{r}
 ShreveportHOLC <- st_read("Data/Shreveport.json")
 
@@ -702,7 +702,7 @@ tm_shape(ShreveportHOLC) +
             legend.outside = FALSE, legend.position = c("LEFT", "bottom"))
 ```
 
-Now let's grab Census tracts for Shreveport.
+Now let's grab Census tracts for Shreveport, Louisiana.
 ```{r}
 shreveport_pop <- get_decennial(
   geography = "tract",
@@ -785,7 +785,7 @@ B <- tm_shape(interpolated_output_grouped) +
 tmap_arrange(A, B, ncol = 2, asp = TRUE)
 ```
 
-Happy mapping and spatial analysis with Census and ACS estimates in R!
+WE NEED SOME TYPE OF ENDING HERE!
 
 
 
