@@ -17,7 +17,6 @@ if(FALSE){
 }
 ```
 
-
 # Introduction
 
 ## Why use U.S. Census data in climate research?
@@ -47,7 +46,6 @@ Decennial Census data is available at all geographies on the spine, but the intr
 
 Aggregated, area-level ACS data is available annually at the national, state, and large county or city levels (65,000 or more). Uncertainty in these estimates arise from the **sampling variability** inherent in the household sampling scheme. Though data is collected annually, data is only shared publicly at the Census tract and block group level using 5-years of data. Sub-samples of ACS **microdata**, or person-level data, can be accessed for larger levels of geographies as well.
 
-    
 ## Why access Census data with R or Python?
 
 Many Census data tables are available for download as Excel files or .csv's via the Census website and through [this interactive Census website](https://data.census.gov/table). However, accessing this data is not always reproducible. Moreover, you often need to download data for bigger geographic areas than may be of interest to you. Many packages and services exist to incorporate the downloading and accessing of specific variables for specific geographies into a reproducible workflow within R or Python. In addition, these packages often do much of the necessary "heavy-lifting" required to get the data into an easy-to-use format for other data science, GIS, or statistical programming tasks.
@@ -66,9 +64,13 @@ The [Census Application Programming Interface (API)](https://www.census.gov/data
 The `censusapi` package ([CRAN](https://cran.r-project.org/web/packages/censusapi/index.html), [GitHub](https://github.com/hrecht/censusapi), [Author website](https://www.hrecht.com/censusapi/)) is an R package written and maintained by [Hannah Recht](https://www.hrecht.com/) that provides a suite of functions that facilitate the construction and implementation of Census API URL queries for more than 1,500 Census API endpoints. This package is an incredible tool, but there are better options if you are mainly interested in decennial Census and ACS data.
 
 ##  IPUMS, NHGIS, and `ipumsr`
-... [Tyler, do you want to write this section? I'm happy to if not! Also, do we move tigris here?]
+[IPUMS](https://www.ipums.org/) provides democratized census and survey data from around the world integrated across time and space. It is the world’s largest accessible database of census microdata, which includes almost a billion records from U.S. censuses from 1790 to the present and over a billion records from the international censuses of over 100 countries.
 
-##  `tidycensus`
+Beyond census and survey microdata, IPUMS integrates and disseminates area-level census data and electronic boundaries describing census geography for the U.S. and internationally through its [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/). NHGIS provides easy access to summary tables and time series of population, housing, agriculture, and economic data, along with GIS-compatible mapping files for all census geographies from 1790 through the present.
+
+The `ipumsr` package [CRAN](https://cran.r-project.org/web/packages/ipumsr/index.html), [GitHub](https://tech.popdata.org/ipumsr/) provides an R interface for handling IPUMS data allowing for users to read files downloaded from the IPUMS extract system, request data, download files, and get metadata from certain IPUMS collectionsm, and process data using the contextual information that is included with many IPUMS files.
+
+##  `tidycensus` and `tigris`
 
 The `tidycensus` package ([CRAN](https://cran.r-project.org/package=tidycensus), [GitHub](https://github.com/walkerke/tidycensus), [Author website](https://walker-data.com/tidycensus/#)) is an R package written and maintained by [Kyle Walker](https://walker-data.com/). The package provides access to tabular decennial Census, ACS, ACS Migration Flows, and Population Estimates datasets at both on- and off-spine Census geographies. In addition to taking care of the logistics of querying the API for you with easy-to-use functions, the `tidycensus` package wrangles the data into a nice format, providing spatial data objects when requested. 
 
