@@ -54,7 +54,7 @@ This tutorial will provide you with the necessary tools to access the Census dat
      
 ## Tutorial Outline
 
-To be drafted.
+The rest of this tutorial is organized as follows. Section 2 introduces the Census API and R-based packages for accessing Census data. Section 3 provides an in-depth introduction to using the `tidycensus` package to query the Census API. Section 4 provides some tips on how to display or use non-spatial Census data accessed via `tidycensus`. Section 5 focuses on Census geographies and map-making using `tigris` and `tidycensus` data. Finally, Section 6 provides an important overview of how to aggregate Census tract data up to larger geographies that may be of importance to research or policy-makers but are not available in Census data.
      
 #  Accessing Census Bureau Data with R Packages
 
@@ -990,7 +990,7 @@ tm_shape(ShreveportHOLC) +
 ```
 
 Now let's grab Census tracts for Shreveport, Louisiana.
-```{r}
+```{r, warning=FALSE, message=FALSE}
 shreveport_pop <- get_decennial(
   geography = "tract",
   state = "LA",
