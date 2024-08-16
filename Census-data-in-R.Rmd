@@ -68,11 +68,13 @@ The `censusapi` package ([CRAN](https://cran.r-project.org/web/packages/censusap
 
 Beyond census and survey microdata, IPUMS integrates and disseminates area-level census data and electronic boundaries describing census geography for the U.S. and internationally through its [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/). NHGIS provides easy access to summary tables and time series of population, housing, agriculture, and economic data, along with GIS-compatible mapping files for all census geographies from 1790 through the present.
 
-The `ipumsr` package [CRAN](https://cran.r-project.org/web/packages/ipumsr/index.html), [GitHub](https://tech.popdata.org/ipumsr/) provides an R interface for handling IPUMS data allowing for users to read files downloaded from the IPUMS extract system, request data, download files, and get metadata from certain IPUMS collectionsm, and process data using the contextual information that is included with many IPUMS files.
+The `ipumsr` package ([CRAN](https://cran.r-project.org/web/packages/ipumsr/index.html), [GitHub](https://tech.popdata.org/ipumsr/)) provides an R interface for handling IPUMS data allowing for users to read files downloaded from the IPUMS extract system, request data, download files, and get metadata from certain IPUMS collectionsm, and process data using the contextual information that is included with many IPUMS files.
 
 ##  `tidycensus` and `tigris`
 
 The `tidycensus` package ([CRAN](https://cran.r-project.org/package=tidycensus), [GitHub](https://github.com/walkerke/tidycensus), [Author website](https://walker-data.com/tidycensus/#)) is an R package written and maintained by [Kyle Walker](https://walker-data.com/). The package provides access to tabular decennial Census, ACS, ACS Migration Flows, and Population Estimates datasets at both on- and off-spine Census geographies. In addition to taking care of the logistics of querying the API for you with easy-to-use functions, the `tidycensus` package wrangles the data into a nice format, providing spatial data objects when requested. 
+
+The `tigris` package ([CRAN](https://cran.r-project.org/web/packages/tigris/), [GitHub](https://github.com/walkerke/tigris)) is another R package written and maintained by [Kyle Walker](https://walker-data.com/). The packages allows users to directly download and use TIGER/Line shapefiles from the US Census Bureau. 
 
 The remainder of this tutorial will focus on using `tidycensus`.
 
