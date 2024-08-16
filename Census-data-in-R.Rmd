@@ -57,6 +57,7 @@ This tutorial will provide you with the necessary tools to access the Census dat
 To be drafted.
      
 #  Accessing Census Bureau Data with R Packages
+
 ##  The Census API and `censusapi`
 
 The [Census Application Programming Interface (API)](https://www.census.gov/data/developers/guidance/api-user-guide.html) is a tool built by the Census Bureau to allow for the downloading of public use Census data in an easy and systematic way. The Census API can be queried by anyone with the internet and a **Census API Key** (a unique-to-you alphanumeric code issued by the Census Bureau).  It is constructed so you can specify the dataset and year you want, the specific variables you want within that dataset, and the geography for which you want the information within a formulaic URL in a relatively intuitive way. (See [examples](https://www.census.gov/data/developers/guidance/api-user-guide.Example_API_Queries.html#list-tab-559651575).) Though you can type these URLs into your internet browser, using functions within R or Python to visit certain URLs that query the API allow for a reproducible workflow. [This online Census Bureau course](https://www.census.gov/data/academy/courses/intro-to-the-census-bureau-data-api.html#1) is useful for those interested in learning more about the Census API
@@ -64,6 +65,7 @@ The [Census Application Programming Interface (API)](https://www.census.gov/data
 The `censusapi` package ([CRAN](https://cran.r-project.org/web/packages/censusapi/index.html), [GitHub](https://github.com/hrecht/censusapi), [Author website](https://www.hrecht.com/censusapi/)) is an R package written and maintained by [Hannah Recht](https://www.hrecht.com/) that provides a suite of functions that facilitate the construction and implementation of Census API URL queries for more than 1,500 Census API endpoints. This package is an incredible tool, but there are better options if you are mainly interested in decennial Census and ACS data.
 
 ##  IPUMS, NHGIS, and `ipumsr`
+
 [IPUMS](https://www.ipums.org/) provides democratized census and survey data from around the world integrated across time and space. It is the world’s largest accessible database of census microdata, which includes almost a billion records from U.S. censuses from 1790 to the present and over a billion records from the international censuses of over 100 countries.
 
 Beyond census and survey microdata, IPUMS integrates and disseminates area-level census data and electronic boundaries describing census geography for the U.S. and internationally through its [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/). NHGIS provides easy access to summary tables and time series of population, housing, agriculture, and economic data, along with GIS-compatible mapping files for all census geographies from 1790 through the present.
@@ -94,7 +96,6 @@ When initializing your group's GitHub repository, add the name of this file to y
 
 ![**Figure 3. Adding your API key script to the .gitignore file**](Figures/gitignoreAPI.png)
 
-
 Once your `.gitignore` is modified and pushed, every team member can have their own CensusAPIKey.R file on their own machine that is never pushed to GitHub. Your team's code can be written in such a way that if CensusAPIKey.R is sourced in a script, every time an API key is needed a reference to the object `myKey` will be sufficient regardless of which team member is executing code. See example using `tidycensus` below.
 
 ```{r apikey_example, echo = TRUE, eval = FALSE}
@@ -118,7 +119,6 @@ census_api_key(key = myKey)
 # Using `tidycensus`
 
 The `tidycensus` package is superbly developed and maintained. Moreover, Kyle Walker has developed [so much material](https://walker-data.com/tidycensus/articles/) to aid `tidycensus` users including an entire textbook, [Analyzing US Census Data: Methods, Maps, and Models in R](https://walker-data.com/census-r/index.html). For questions not answered in this tutorial, this book is a great place to start.
-
 
 ## Selecting variables and tables
 
@@ -324,6 +324,7 @@ pop_sex_age_king_2021 %>%
 ```
 
 # Getting results
+
 ## Basic tables & plots
 [to draft a kableExtra example]
 
@@ -333,7 +334,7 @@ pop_sex_age_king_2021 %>%
 
 [to draft]
 
-## Census Geographic Data
+# Census Geographic Data
 
 Census and ACS data are often associated with inherent *geographies*, which are units at which the data are aggregated. The defined geographies are represented in the U.S. Census Bureau's TIGER/Line database. TIGER stands for *Topologically Integrated Geographic Encoding and Referencing* and can be simply thought of as the official geographic spatial data of the U.S. Census Bureau.
 
@@ -378,7 +379,7 @@ seattle_tracts <- tracts("WA", "King", progress_bar = FALSE)
 plot(seattle_tracts$geometry)
 ```
 
-### Plotting Geographic Data in R
+## Plotting Geographic Data in R
 
 R includes a number of options outside of the *plot()* function for quick visualization of geographic data that will be useful for geospatial analysis. For ease and inutitiveness, we suggest the **ggplot2** or **tmap** packages.
 
@@ -456,7 +457,7 @@ plot(wa_projected$geometry)
 
 With a properly projected spatial data set, now we can apply any of the geospatial analyst functions (i.e., spatial overlays, intersections, buffers, etc.) without fear of distortion. From a pure mapping perspective, geographic coordinate systems---in $^\circ$ latitude and longitude---can work, but we suggest to almost always use a properly projected coordinate reference system.
 
-### Working with Census Geometries
+## Working with Census Geometries
 
 While understanding coordinate reference system transformations is important for spatial data management and geographic visualization, other types of geometric manipulations may be required by the spatial analyst.
 
@@ -674,7 +675,7 @@ tm_shape(background_tracts) +
             legend.outside = TRUE)
 ```
 
-## Areal Interpolation
+# Areal Interpolation
 
 Areal interpolation is the process making estimates from a source set of polygons to an overlapping but non-congruent set of target polygons. This technique is helpful if a project requires spatial analysis at the scale of a geometry not included in the Census enumerations.
 
