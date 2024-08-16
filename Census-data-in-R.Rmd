@@ -433,13 +433,8 @@ pop_sex_age_king_2021 %>%
 ```
 
 # Getting results
-<<<<<<< Updated upstream
 
-## Basic tables & plots
-[to draft a kableExtra example]
-=======
 ## Basic tables
->>>>>>> Stashed changes
 
 Suppose you simply want to report the total male and female population in King County in 2021. Our output `pop_sex_king_2021` contains all the information you need to make a nice table using the `kableExtra` package.
 
@@ -483,6 +478,7 @@ pop_sex_king_2021 %>%
       caption = "ACS 1-year estimates of sex-specfic population in King County, Washington in 2021.") %>% 
   kable_styling(position = "center", full_width = FALSE)
 ```
+
 ## Multi-year results
 
 One frustrating thing about `get_decennial()` and `get_acs()` is that they **do not** allow you to specify more than one year per API query. 
@@ -559,6 +555,7 @@ pop_df %>%
   ylab("Population") +
   theme_classic()
 ```
+
 ##   Aggregating estimates across labels
 
 Let us return now to our example of sex- and age-specific population. The "B01001" table from the ACS contains population estimates for each sex and age group 0-5, 5-9, 10-14, 15-17, 18-19, 20, 21, 22-24, 25-29, 30-34, 35-39, 40-44, 45-49, 50-54, 55-59, 60-61, 62-64, 65-66, 67-69, 70-74, 75-79, 80-84, and 85+. However, suppose what we want, is actualy 5-year age groups all the way up to 85+. In other words, we want to collapse 20, 21, 22-24 into 20-24, etc. We will need to aggregate both estimates and standard errors properly over age categories.
