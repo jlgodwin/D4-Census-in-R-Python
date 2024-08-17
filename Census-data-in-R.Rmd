@@ -1039,7 +1039,6 @@ Now we have a total population count ("value") for each HOLC neighborhood design
 
 We can then map total population by neighborhood individually:
 ```{r}
-library(RColorBrewer)
 tm_shape(interpolated_output) +
   tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
   tm_layout(frame = FALSE,
