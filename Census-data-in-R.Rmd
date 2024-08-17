@@ -978,7 +978,7 @@ Read in the HOLC spatial data and plot it according to neighborhood designation.
 ShreveportHOLC <- st_read("Data/Shreveport.json")
 
 ShreveportHOLC <- ShreveportHOLC %>%
-  filter(!grade == "NA") # remove industrial and commerical grades
+  filter(!grade == "NA") # remove industrial and commercial grades
 
 pal = c("darkgreen", "blue", "yellow", "red")
 
@@ -1015,17 +1015,19 @@ ShreveportHOLC$ID <- 1:nrow(ShreveportHOLC)
 shreveport_pop$ID2 <- 1:nrow(shreveport_pop)
 
 ShreveportHOLC <- ShreveportHOLC %>%
-  st_set_crs(4326) %>%
+  st_set_crs(st_crs(shreveport_pop)) %>%
   st_transform(., 5070)
 
 shreveport_pop <- shreveport_pop %>%
-  st_set_crs(5070)
+  st_transform(., 5070)
+
+ar_validate(shreveport_pop, ShreveportHOLC, "value")
 
 interpolated_output <- aw_interpolate(ShreveportHOLC, 
                tid = "ID", 
                source = shreveport_pop, 
                sid = "ID2",
-               extensive = c("value"),
+               extensive = "value",
                weight = "total", 
                output = "sf")
 
@@ -1037,6 +1039,7 @@ Now we have a total population count ("value") for each HOLC neighborhood design
 
 We can then map total population by neighborhood individually:
 ```{r}
+library(RColorBrewer)
 tm_shape(interpolated_output) +
   tm_polygons("value", palette = "PuBu", style = "quantile", title = "Total Population") +
   tm_layout(frame = FALSE,
