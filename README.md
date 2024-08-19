@@ -1,21 +1,43 @@
 # D4 Tutorial: Reproducibly Accessing Census Data in R & Python
+**Authored By:**
+[Tyler Fricker](https://www.ulm.edu/~tfricker/)
+[Jessica Godwin](https://csde.washington.edu/staff/godwin-jessica/)
+[June Yang](https://csde.washington.edu/staff/yang-june/)
 
-**Outline**
+R tutorial contained in *Census-data-in-R.Rmd* and *Census-data-in-R.html* files.
+Python tutorial coming soon!
 
-  *  Text Intro
-     *  Why Census data for climate work?
-     *  Why R/Python vs. point-and-click?
-     *  Organization of rest of tutorial
-  *  Accessing Census Bureau Data with R Packages
-     *  The Census API and censusapi
-     *  IPUMS, NHGIS, and ipumsr
-     *  tidycensus
-     *  Getting your API key and writing reproducible/collaborative code that does not disclose your API key
-  *  Using tidycensus to access variables and tables
-     *  Choosing an appropriate Census dataset for your task
-     *  Finding variable names by searching concepts and labels
-     *  Pulling data and basic cleaning (i.e. dealing with the "!!" in the labels)
-  *  Getting results
-     *  Combining Census data with other data sources [Tyler]
-     *  Aggregating estimates across labels (i.e. getting the standard errors as right as you can) 
-     *  Creating maps [Tyler]
+## **R Tutorial Outline**
+
+*  Introduction
+   *  Why use U.S. Census data in climate research?
+   *  Census geographies and uncertainty
+   *  Why access Census data with R or Python?
+   *  Tutorial Outline
+*  Accessing Census Bureau Data with R Packages
+   *  The Census API and censusapi
+   *  IPUMS, NHGIS, and ipums
+   *  tidycensus and tigris
+   *  Getting and managing your Census API key
+*  Using tidycensus
+   *  Selecting variables and tables
+      *  Datasets
+      *  Variable & table names
+      *  Data Year
+      *  Geographic scale
+      *  Temporal scale
+   *  Querying the Census API
+      *  get_decennial()
+      *  get_acs()
+   *  Dealing with variable labels
+*  Getting results
+   *  Basic tables
+   *  Multi-year results
+   *  Aggregating estimates across labels
+*  Census Geographic Data
+   *  Plotting Geographic Data in R
+   *  Working with Census Geometries
+   *  Mapping Census and ACS Estimates in R
+      *  Map-Making with ggplot2
+      *  Map-Making with tmap
+*  Areal Interpolation
