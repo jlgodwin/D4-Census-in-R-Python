@@ -331,7 +331,7 @@ The **block** code that uniquely identifies each Census block within a block gro
 Below we provide code for pulling counts of counts of individuals by sex for King County, Washington from the 2021 ACS using the following information:
 
   * the dataset: ACS,
-  * the dataset-specific variable name: total male (002) and female (026) population `variables = c("B01001_002", "B01001_025")`,
+  * the dataset-specific variable name: total male (002) and female (026) population `variables = c("B01001_002", "B01001_026")`,
   * the annual timeframe: `year = 2021`,
   * the geographic level: `geography = "county"` and `state = "WA"` and `county = "King"`,
   * the temporal scale: using ACS data at county level, let's use 1-year data `survey = "acs1"`
