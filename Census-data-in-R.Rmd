@@ -1074,7 +1074,6 @@ B <- tm_shape(interpolated_output_grouped) +
 tmap_arrange(A, B, ncol = 2, asp = TRUE)
 ```
 
-WE NEED SOME TYPE OF ENDING HERE!
 
 
 
