@@ -50,3 +50,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# ipynb checkpoint
+.ipynb_checkpoints/
+
+# pycache
+__pycache__/

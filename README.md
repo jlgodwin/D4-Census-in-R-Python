@@ -15,7 +15,10 @@
       * **Figures/** contains some *.png* files necessary to knit the *.Rmd* into an *.html*.
       * **CensusAPIKey.R** is a file necessary for running or knitting the R tutorial, but is included in the *.gitignore* file. Read the R tutorial's section titled *Getting and managing your Census API Key* for more information on how to set up your own *CensusAPIKey.R* file.
 
-***Python tutorial coming soon!***
+**Python tutorial contained in *Census-data-in-Python.ipynb* and *Census-data-in-Python.html* files.**
+  * **Dependencies**
+      * **Figures/** contains some *.png* files necessary to knit the *.ipynb* into an *.html*.
+      * **CensusAPIKey.py** is a file necessary for running or knitting the Python tutorial, but is included in the *.gitignore* file. Read the Python tutorial's section titled *Getting and managing your Census API Key* for more information on how to set up your own *CensusAPIKey.py* file.
 
 ## **Tutorial Outline**
 
