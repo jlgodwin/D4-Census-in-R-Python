@@ -1,5 +1,5 @@
 # Census API files
-CensusAPIKey.R
+CensusAPIKey.py
 
 # History files
 .Rhistory
@@ -50,3 +50,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# ipynb checkpoint
+.ipynb_checkpoints/
+
+# pycache
+__pycache__/
